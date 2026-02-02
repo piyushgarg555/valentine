@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.3">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!doctype html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="utf-8" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Valentine?&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>body{ margin:0; height:100vh; display:grid; place-items:center; font-family:system-ui;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: linear-gradient(135deg,#fff1f6,#ffffff);}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.card{ background:#fff; padding:28px; border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,.12);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width:min(460px,92vw); text-align:center;}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>h1{ margin:0 0 10px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.stage{ position:relative; height:110px; margin-top:10px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>button{ border:0; padding:12px 18px; border-radius:12px; font-size:16px; cursor:pointer; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>#yes{ background:#ff3b7a; color:#fff; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>#no{ background:#eee; color:#333; position:absolute; left:55%; top:52px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.row{ display:flex; gap:12px; justify-content:center; align-items:center; margin-top:18px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>a{ display:inline-block; margin-top:14px; color:#666; font-size:13px; text-decoration:underline; cursor:pointer;}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.msg{ margin-top:14px; font-size:18px;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h1&gt;Irina Karyakina, will you be my Valentine? 💘&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="stage"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button id="yes"&gt;Yes 💖&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button id="no"&gt;No 🙈&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;a id="escape"&gt; ️&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="msg" class="msg"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const noBtn = document.getElementById("no");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const yesBtn = document.getElementById("yes");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const escape = document.getElementById("escape");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const msg = document.getElementById("msg");</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const moveNo = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const card = document.querySelector(".card");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const stage = document.querySelector(".stage");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const rect = stage.getBoundingClientRect();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const padding = 10;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const maxX = rect.width - noBtn.offsetWidth - padding;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const maxY = rect.height - noBtn.offsetHeight - padding;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const x = Math.random() * maxX + padding;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const y = Math.random() * maxY + padding;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>noBtn.style.left = x + "px";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>noBtn.style.top<span class="Apple-converted-space">  </span>= y + "px";</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>noBtn.addEventListener("mouseenter", moveNo);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>noBtn.addEventListener("click", moveNo);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>yesBtn.addEventListener("click", () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>msg.textContent = "Yesss!! 💞 I’m taking you on a cute date 😄";</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>escape.addEventListener("click", () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>msg.textContent = "Totally okay ❤️ Thanks for being you.";</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
