@@ -1,69 +1,461 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Valentine?</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Valentine</title>
+
   <style>
-    body{ margin:0; height:100vh; display:grid; place-items:center; font-family:system-ui;
-      background: linear-gradient(135deg,#fff1f6,#ffffff);}
-    .card{ background:#fff; padding:28px; border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,.12);
-      width:min(460px,92vw); text-align:center;}
-    h1{ margin:0 0 10px; }
-    .stage{ position:relative; height:110px; margin-top:10px; }
-    button{ border:0; padding:12px 18px; border-radius:12px; font-size:16px; cursor:pointer; }
-    #yes{ background:#ff3b7a; color:#fff; }
-    #no{ background:#eee; color:#333; position:absolute; left:55%; top:52px; }
-    .row{ display:flex; gap:12px; justify-content:center; align-items:center; margin-top:18px; }
-    a{ display:inline-block; margin-top:14px; color:#666; font-size:13px; text-decoration:underline; cursor:pointer;}
-    .msg{ margin-top:14px; font-size:18px;}
+    :root{
+      --card-w: min(980px, 92vw);
+      --card-h: min(480px, 74vh);
+      --pink: #ff3b7b;
+    }
+
+    *{ box-sizing: border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at top, #fff3f6, #ffe6ee);
+      overflow:hidden;
+    }
+
+    /* When YES is clicked, we blur/dim the background */
+    body.blur-bg .stage{
+      filter: blur(10px);
+      transform: scale(1.02);
+    }
+    body.blur-bg .shade{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .shade{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.22);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+      z-index: 10;
+    }
+
+    .stage{
+      transition: filter 0.35s ease, transform 0.35s ease;
+      width: var(--card-w);
+      height: var(--card-h);
+      position: relative;
+    }
+
+    .card{
+      width: 100%;
+      height: 100%;
+      background: white;
+      border-radius: 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      position: relative;
+      overflow: hidden;
+      padding: 52px 26px;
+      text-align: center;
+    }
+
+    h1{
+      margin: 0;
+      font-size: clamp(28px, 4vw, 58px);
+      line-height: 1.05;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+    }
+    .sub{
+      margin-top: 10px;
+      font-size: 16px;
+      opacity: 0.72;
+    }
+
+    .btn{
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 22px;
+      font-size: 18px;
+      cursor: pointer;
+      user-select: none;
+      position: absolute;
+      will-change: left, top, transform;
+      transition: transform 0.12s ease;
+    }
+    .btn:active{ transform: scale(0.98); }
+
+    #yes{
+      background: var(--pink);
+      color: white;
+      left: 50%;
+      top: 64%;
+      transform: translateX(-70%);
+      box-shadow: 0 12px 30px rgba(255,59,123,0.25);
+    }
+    #no{
+      background: #f1f1f1;
+      color: #222;
+      left: 50%;
+      top: 64%;
+      transform: translateX(30%);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+    }
+
+    .toast{
+      position:absolute;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%);
+      background: rgba(0,0,0,0.75);
+      color:#fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 0.2s ease;
+      z-index: 2;
+    }
+    .toast.show{ opacity:1; }
+
+    /* Polaroid modal */
+    .polaroid-wrap{
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(12px) scale(0.98);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      z-index: 20;
+    }
+    body.blur-bg .polaroid-wrap{
+      pointer-events: auto;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .polaroid{
+      width: min(360px, 86vw);
+      background: #fff;
+      border-radius: 18px;
+      padding: 16px 16px 18px;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.28);
+      position: relative;
+    }
+
+    .polaroid::before{
+      content:"";
+      position:absolute;
+      inset:-14px;
+      border-radius: 26px;
+      background: radial-gradient(circle at 20% 10%, rgba(255,59,123,0.18), transparent 55%),
+                  radial-gradient(circle at 80% 90%, rgba(255, 214, 231, 0.65), transparent 55%);
+      filter: blur(14px);
+      z-index:-1;
+    }
+
+    .photo{
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #f6f6f6;
+      border: 2px solid rgba(0,0,0,0.06);
+    }
+    .photo img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+    }
+
+    .caption{
+      margin-top: 12px;
+      padding: 0 6px;
+      text-align: center;
+    }
+    .caption .big{
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .caption .small{
+      margin-top: 4px;
+      font-size: 14px;
+      opacity: 0.75;
+    }
+
+    .close{
+      position:absolute;
+      top: 10px;
+      right: 10px;
+      border:0;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      cursor:pointer;
+      background: rgba(0,0,0,0.06);
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .close:hover{
+      background: rgba(0,0,0,0.1);
+      transform: scale(1.04);
+    }
+
+    /* Tiny heart burst (simple + lightweight) */
+    .heart{
+      position: fixed;
+      font-size: 18px;
+      pointer-events: none;
+      opacity: 0;
+      animation: floatUp 900ms ease forwards;
+      z-index: 30;
+    }
+    @keyframes floatUp{
+      0%   { transform: translate(-50%, -20%) scale(0.8); opacity: 0; }
+      15%  { opacity: 1; }
+      100% { transform: translate(-50%, -140px) scale(1.15); opacity: 0; }
+    }
   </style>
 </head>
-<body>
-  <div class="card">
-    <h1>Irina Karyakina, will you be my Valentine? 💘</h1>
-    <div class="stage">
-      <div class="row">
-        <button id="yes">Yes 💖</button>
-      </div>
-      <button id="no">No 🙈</button>
-    </div>
 
-    <a id="escape"> ️</a>
-    <div id="msg" class="msg"></div>
+<body>
+  <div class="shade" id="shade"></div>
+
+  <div class="stage" id="stage">
+    <div class="card" id="card">
+      <h1>Irina Karyakina, will you be my Valentine? 💘</h1>
+      <div class="sub">Choose wisely 😇</div>
+
+      <button class="btn" id="yes">Yes ✨💞</button>
+      <button class="btn" id="no">No 🙈</button>
+
+      <div class="toast" id="toast">YAYYY 💖</div>
+    </div>
+  </div>
+
+  <!-- Polaroid modal -->
+  <div class="polaroid-wrap" id="polaroidWrap" aria-hidden="true">
+    <div class="polaroid" role="dialog" aria-modal="true" aria-label="Valentine photo">
+      <button class="close" id="closePolaroid" aria-label="Close">✕</button>
+      <div class="photo">
+        <!-- Put us.jpg in the SAME folder as index.html -->
+        <img src="us.jpg" alt="Us" />
+      </div>
+      <div class="caption">
+        <div class="big">Best decision ever 💖</div>
+        <div class="small">Happy Valentine’s, love 🌹</div>
+      </div>
+    </div>
   </div>
 
   <script>
-    const noBtn = document.getElementById("no");
-    const yesBtn = document.getElementById("yes");
-    const escape = document.getElementById("escape");
-    const msg = document.getElementById("msg");
+    const card = document.getElementById("card");
+    const btnYes = document.getElementById("yes");
+    const btnNo = document.getElementById("no");
+    const toast = document.getElementById("toast");
+    const shade = document.getElementById("shade");
+    const closePolaroid = document.getElementById("closePolaroid");
 
-    const moveNo = () => {
-      const card = document.querySelector(".card");
-      const stage = document.querySelector(".stage");
-      const rect = stage.getBoundingClientRect();
-
-      const padding = 10;
-      const maxX = rect.width - noBtn.offsetWidth - padding;
-      const maxY = rect.height - noBtn.offsetHeight - padding;
-
-      const x = Math.random() * maxX + padding;
-      const y = Math.random() * maxY + padding;
-
-      noBtn.style.left = x + "px";
-      noBtn.style.top  = y + "px";
+    // --- "No" movement state (smooth + random + dodge) ---
+    const state = {
+      x: 0, y: 0,
+      vx: 0, vy: 0,
+      initialized: false,
+      dodges: 0,
+      lastNudge: 0
     };
 
-    noBtn.addEventListener("mouseenter", moveNo);
-    noBtn.addEventListener("click", moveNo);
+    function rect(el){ return el.getBoundingClientRect(); }
+    function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
 
-    yesBtn.addEventListener("click", () => {
-      msg.textContent = "Yesss!! 💞 I’m taking you on a cute date 😄";
+    function bounds(){
+      const r = rect(card);
+      return {
+        left: r.left + 18,
+        top: r.top + 18,
+        right: r.right - 18,
+        bottom: r.bottom - 18
+      };
+    }
+
+    function randomUnit(){
+      const a = Math.random() * Math.PI * 2;
+      return { x: Math.cos(a), y: Math.sin(a) };
+    }
+
+    function setNoPosition(cx, cy){
+      const c = rect(card);
+      const n = rect(btnNo);
+      const pad = 10;
+
+      const left = cx - c.left - n.width/2;
+      const top  = cy - c.top  - n.height/2;
+
+      btnNo.style.left = `${clamp(left, pad, c.width - n.width - pad)}px`;
+      btnNo.style.top  = `${clamp(top,  pad, c.height - n.height - pad)}px`;
+    }
+
+    function center(el){
+      const r = rect(el);
+      return { x: r.left + r.width/2, y: r.top + r.height/2, w: r.width, h: r.height };
+    }
+
+    function overlapsYes(nx, ny){
+      const n = rect(btnNo);
+      const y = rect(btnYes);
+      const nBox = {
+        left: nx - n.width/2, right: nx + n.width/2,
+        top: ny - n.height/2, bottom: ny + n.height/2
+      };
+      return !(nBox.right < y.left || nBox.left > y.right || nBox.bottom < y.top || nBox.top > y.bottom);
+    }
+
+    function initNo(){
+      const n = center(btnNo);
+      state.x = n.x; state.y = n.y;
+      const u = randomUnit();
+      const speed = 140 + Math.random() * 90; // px/s
+      state.vx = u.x * speed;
+      state.vy = u.y * speed;
+      state.initialized = true;
+    }
+
+    function nudgeAwayFrom(px, py){
+      const n = center(btnNo);
+      const dx = n.x - px;
+      const dy = n.y - py;
+      const dist = Math.hypot(dx, dy) || 1;
+
+      const awayX = dx / dist;
+      const awayY = dy / dist;
+
+      const rand = randomUnit();
+      const kick = 240 + Math.random() * 280;
+      const boost = Math.min(160, state.dodges * 12);
+
+      state.vx = (awayX * 0.75 + rand.x * 0.25) * (kick + boost);
+      state.vy = (awayY * 0.75 + rand.y * 0.25) * (kick + boost);
+
+      state.dodges += 1;
+      state.lastNudge = performance.now();
+    }
+
+    card.addEventListener("mousemove", (e) => {
+      if (!state.initialized) initNo();
+
+      const n = center(btnNo);
+      const dist = Math.hypot(n.x - e.clientX, n.y - e.clientY);
+      const trigger = 115 + Math.min(85, state.dodges * 7);
+
+      if (dist < trigger && performance.now() - state.lastNudge > 120){
+        nudgeAwayFrom(e.clientX, e.clientY);
+      }
     });
 
-    escape.addEventListener("click", () => {
-      msg.textContent = "Totally okay ❤️ Thanks for being you.";
+    ["mouseenter","touchstart"].forEach(evt => {
+      btnNo.addEventListener(evt, (e) => {
+        if (!state.initialized) initNo();
+        const p = (e.touches && e.touches[0]) ? e.touches[0] : e;
+        nudgeAwayFrom(p.clientX, p.clientY);
+      }, { passive:true });
+    });
+
+    let last = performance.now();
+    function tick(now){
+      const dt = Math.min(0.03, (now - last) / 1000);
+      last = now;
+
+      if (state.initialized){
+        const b = bounds();
+        const n = rect(btnNo);
+
+        // tiny random drift so it never feels predictable
+        state.vx += (Math.random() - 0.5) * 18;
+        state.vy += (Math.random() - 0.5) * 18;
+
+        // cap speed
+        const maxSpeed = 560;
+        const sp = Math.hypot(state.vx, state.vy);
+        if (sp > maxSpeed){
+          state.vx = state.vx / sp * maxSpeed;
+          state.vy = state.vy / sp * maxSpeed;
+        }
+
+        let nx = state.x + state.vx * dt;
+        let ny = state.y + state.vy * dt;
+
+        const halfW = n.width / 2;
+        const halfH = n.height / 2;
+
+        // bounce
+        if (nx - halfW < b.left)  { nx = b.left + halfW; state.vx *= -0.9; }
+        if (nx + halfW > b.right) { nx = b.right - halfW; state.vx *= -0.9; }
+        if (ny - halfH < b.top)   { ny = b.top + halfH; state.vy *= -0.9; }
+        if (ny + halfH > b.bottom){ ny = b.bottom - halfH; state.vy *= -0.9; }
+
+        // avoid overlapping YES
+        if (overlapsYes(nx, ny)){
+          const u = randomUnit();
+          state.vx = u.x * (240 + Math.random() * 260);
+          state.vy = u.y * (240 + Math.random() * 260);
+          nx = state.x; ny = state.y;
+        }
+
+        state.x = nx; state.y = ny;
+        setNoPosition(state.x, state.y);
+      }
+
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    // --- YES behavior: blur + polaroid + hearts ---
+    function heartBurst(x, y){
+      const hearts = ["💖","💘","💞","💕","💗"];
+      for (let i=0; i<9; i++){
+        const el = document.createElement("div");
+        el.className = "heart";
+        el.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+        el.style.left = (x + (Math.random()-0.5)*160) + "px";
+        el.style.top  = (y + (Math.random()-0.5)*60) + "px";
+        el.style.animationDelay = (Math.random()*120) + "ms";
+        document.body.appendChild(el);
+        requestAnimationFrame(() => { el.style.opacity = 1; });
+        setTimeout(() => el.remove(), 1100);
+      }
+    }
+
+    btnYes.addEventListener("click", (e) => {
+      toast.textContent = "YAYYY 💖";
+      toast.classList.add("show");
+
+      document.body.classList.add("blur-bg");
+      heartBurst(e.clientX, e.clientY);
+
+      setTimeout(() => toast.classList.remove("show"), 1400);
+    });
+
+    function closeModal(){
+      document.body.classList.remove("blur-bg");
+    }
+
+    shade.addEventListener("click", closeModal);
+    closePolaroid.addEventListener("click", closeModal);
+
+    // If someone somehow clicks NO
+    btnNo.addEventListener("click", () => {
+      const msg = ["Nice try 😇", "Not happening 🙈", "Caught you!", "Try again 😏"];
+      toast.textContent = msg[Math.floor(Math.random() * msg.length)];
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 900);
     });
   </script>
 </body>
